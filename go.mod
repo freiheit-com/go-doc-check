@@ -1,4 +1,4 @@
-module github.com/freiheit.com/go-doc-check
+module github.com/freiheit-com/go-doc-check
 
 go 1.13
 
