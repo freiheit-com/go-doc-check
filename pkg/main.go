@@ -144,7 +144,12 @@ func (c *Checker) checkReadmeSubfolders(folder string) error {
 }
 
 func (c *Checker) checkGoFileDoc(subfolder string) error {
-	return filepath.Walk(filepath.Join(c.repoPath, subfolder), func(path string, file os.FileInfo, err error) error {
+	root := filepath.Join(c.repoPath, subfolder)
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		return fmt.Errorf("root folder %s does not exist!", root)
+	}
+
+	return filepath.Walk(root, func(path string, file os.FileInfo, err error) error {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".go") {
 			err := c.goFileHasDocComment(path)
 			if err != nil {

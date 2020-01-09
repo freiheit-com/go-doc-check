@@ -73,7 +73,7 @@ func TestCheckReadmeSubfolders(t *testing.T) {
 				repoPath: tc.repoPath,
 				reporter: memReporter,
 			}
-			checker.checkReadmeSubfolders(tc.folder)
+			assert.Nil(t, checker.checkReadmeSubfolders(tc.folder))
 
 			sort.Strings(tc.expectedReportMessages)
 			sort.Strings(memReporter.message)
@@ -86,21 +86,64 @@ func TestCheckReadmeSubfolders(t *testing.T) {
 func TestCheckGoFileDoc(t *testing.T) {
 	memReporter := &MemReporter{}
 	checker := Checker{
-		repoPath: "../testdata/",
+		repoPath: "../testdata/filedoc",
 		reporter: memReporter,
 	}
-	checker.checkGoFileDoc("filedoc")
+	assert.Nil(t, checker.checkGoFileDoc("filedoc1"))
 
 	expectedMessages := []string{
-		"../testdata/filedoc/top_without.go does not contain a file comment!",
-		"../testdata/filedoc/nested/nested_without.go does not contain a file comment!",
-		"../testdata/filedoc/nested/double/double_without.go does not contain a file comment!",
+		"../testdata/filedoc/filedoc1/top_without.go does not contain a file comment!",
+		"../testdata/filedoc/filedoc1/nested/nested_without.go does not contain a file comment!",
+		"../testdata/filedoc/filedoc1/nested/double/double_without.go does not contain a file comment!",
 	}
 	sort.Strings(expectedMessages)
 	sort.Strings(memReporter.message)
 
 	assert.Equal(t, expectedMessages, memReporter.message)
-	//TODO Write test for last check function
+}
+
+func TestCheckMonoRepo(t *testing.T) {
+	memReporter := &MemReporter{}
+	checker := Checker{
+		repoPath: "../testdata/monorepo",
+		reporter: memReporter,
+	}
+
+	assert.Nil(t, runCheck(modeMonoRepo, &checker))
+
+	expectedMessages := []string{
+		"../testdata/monorepo/README.md does not exist!",
+		"../testdata/monorepo/app/app1/README.md does not exist!",
+		"../testdata/monorepo/pkg/pkg1/README.md does not exist!",
+		"../testdata/monorepo/pkg/pkg1/nodoc.go does not contain a file comment!",
+		"../testdata/monorepo/services/service1/README.md does not exist!",
+		"../testdata/monorepo/services/service1/nodoc.go does not contain a file comment!",
+	}
+	sort.Strings(expectedMessages)
+	sort.Strings(memReporter.message)
+
+	assert.Equal(t, expectedMessages, memReporter.message)
+}
+
+func TestCheckApp(t *testing.T) {
+	memReporter := &MemReporter{}
+	checker := Checker{
+		repoPath: "../testdata/app",
+		reporter: memReporter,
+	}
+
+	assert.Nil(t, runCheck(modeApp, &checker))
+
+	expectedMessages := []string{
+		"../testdata/app/README.md does not exist!",
+		"../testdata/app/app/foo/README.md does not exist!",
+		"../testdata/app/app/foo/foo_nodoc.go does not contain a file comment!",
+		"../testdata/app/app/nodoc.go does not contain a file comment!",
+	}
+	sort.Strings(expectedMessages)
+	sort.Strings(memReporter.message)
+
+	assert.Equal(t, expectedMessages, memReporter.message)
 }
 
 // helper

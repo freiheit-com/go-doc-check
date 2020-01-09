@@ -1,0 +1,4 @@
+///
+/// foo
+///
+package withdoc
