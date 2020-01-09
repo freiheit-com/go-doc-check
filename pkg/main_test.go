@@ -83,6 +83,26 @@ func TestCheckReadmeSubfolders(t *testing.T) {
 	}
 }
 
+func TestCheckGoFileDoc(t *testing.T) {
+	memReporter := &MemReporter{}
+	checker := Checker{
+		repoPath: "../testdata/",
+		reporter: memReporter,
+	}
+	checker.checkGoFileDoc("filedoc")
+
+	expectedMessages := []string{
+		"../testdata/filedoc/top_without.go does not contain a file comment!",
+		"../testdata/filedoc/nested/nested_without.go does not contain a file comment!",
+		"../testdata/filedoc/nested/double/double_without.go does not contain a file comment!",
+	}
+	sort.Strings(expectedMessages)
+	sort.Strings(memReporter.message)
+
+	assert.Equal(t, expectedMessages, memReporter.message)
+	//TODO Write test for last check function
+}
+
 // helper
 
 type MemReporter struct {

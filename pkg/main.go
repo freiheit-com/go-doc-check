@@ -32,14 +32,22 @@ func main() {
 		reporter: &CLIReporter{},
 	}
 
+	err := runCheck(mode, &checker)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func runCheck(mode string, checker *Checker) error {
 	switch mode {
 	case modeMonoRepo:
-		checker.checkMonoRepo()
+		return checker.checkMonoRepo()
 	case modeApp:
-		checker.checkApp()
+		return checker.checkApp()
 	default:
 		printUsageAndDie()
 	}
+	return nil
 }
 
 type Reporter interface {
@@ -57,20 +65,43 @@ type Checker struct {
 	reporter Reporter
 }
 
-func (c *Checker) checkMonoRepo() {
+func (c *Checker) checkMonoRepo() error {
 	c.checkReadme("") //top-level readme
-	c.checkReadmeSubfolders("app")
-	c.checkReadmeSubfolders("pkg")
-	c.checkReadmeSubfolders("services")
+	err := c.checkReadmeSubfolders("app")
+	if err != nil {
+		return err
+	}
+	err = c.checkReadmeSubfolders("pkg")
+	if err != nil {
+		return err
+	}
+	err = c.checkReadmeSubfolders("services")
+	if err != nil {
+		return err
+	}
 
-	c.checkGoFileDoc("pkg")
-	c.checkGoFileDoc("services")
+	err = c.checkGoFileDoc("pkg")
+	if err != nil {
+		return err
+	}
+	err = c.checkGoFileDoc("services")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (c *Checker) checkApp() {
+func (c *Checker) checkApp() error {
 	c.checkReadme("")
-	c.checkReadmeSubfolders("app")
-	c.checkGoFileDoc("app")
+	err := c.checkReadmeSubfolders("app")
+	if err != nil {
+		return err
+	}
+	err = c.checkGoFileDoc("app")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Checker) checkReadme(folder string) {
@@ -78,6 +109,22 @@ func (c *Checker) checkReadme(folder string) {
 	if err != nil {
 		c.reporter.Report(err.Error())
 	}
+}
+
+func (c *Checker) goFileHasDocComment(path string) error {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	lines := strings.Split(string(data), "\n")
+	for i := 0; i < 2; i++ {
+		if !strings.HasPrefix(lines[i], "///") {
+			c.reporter.Report(fmt.Sprintf("%s does not contain a file comment!", path))
+			return nil
+		}
+	}
+
+	return nil
 }
 
 func (c *Checker) checkReadmeSubfolders(folder string) error {
@@ -96,8 +143,16 @@ func (c *Checker) checkReadmeSubfolders(folder string) error {
 	return nil
 }
 
-func (c *Checker) checkGoFileDoc(subfolder string) {
-
+func (c *Checker) checkGoFileDoc(subfolder string) error {
+	return filepath.Walk(filepath.Join(c.repoPath, subfolder), func(path string, file os.FileInfo, err error) error {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".go") {
+			err := c.goFileHasDocComment(path)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (c *Checker) readme(folder string) string {
