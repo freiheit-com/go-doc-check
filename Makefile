@@ -2,4 +2,4 @@ test:
 	go test ./...
 
 run:
-	go run pkg/main.go
+	go run main.go
