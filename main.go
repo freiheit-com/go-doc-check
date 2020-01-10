@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 	if checker.reporter.FoundIssues() > 0 {
-		fmt.Printf("Found %d issues, please check output\n", checker.reporter.FoundIssues())
+		fmt.Printf("Found %d issues, please check the output\n", checker.reporter.FoundIssues())
 		os.Exit(1)
 	}
 }
