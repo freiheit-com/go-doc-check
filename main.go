@@ -36,6 +36,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if checker.reporter.FoundIssues() {
+		fmt.Printf("Found issues, please check output\n")
+		os.Exit(1)
+	}
 }
 
 func runCheck(mode string, checker *Checker) error {
@@ -52,12 +56,20 @@ func runCheck(mode string, checker *Checker) error {
 
 type Reporter interface {
 	Report(string)
+	FoundIssues() bool
 }
 
-type CLIReporter struct{}
+type CLIReporter struct {
+	foundIssue bool
+}
 
 func (r *CLIReporter) Report(message string) {
+	r.foundIssue = true
 	fmt.Println(message)
+}
+
+func (r *CLIReporter) FoundIssues() bool {
+	return r.foundIssue
 }
 
 type Checker struct {

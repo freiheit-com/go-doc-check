@@ -154,3 +154,7 @@ type MemReporter struct {
 func (r *MemReporter) Report(message string) {
 	r.message = append(r.message, message)
 }
+
+func (r *MemReporter) FoundIssues() bool {
+	return len(r.message) != 0
+}
