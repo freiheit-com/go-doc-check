@@ -1,0 +1,4 @@
+/*
+package doc
+*/
+package foo

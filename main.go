@@ -67,15 +67,15 @@ type Checker struct {
 
 func (c *Checker) checkMonoRepo() error {
 	c.checkReadme("") //top-level readme
-	err := c.checkReadmeSubfolders("app")
+	err := c.checkPackageDocSubfolders("app")
 	if err != nil {
 		return err
 	}
-	err = c.checkReadmeSubfolders("pkg")
+	err = c.checkPackageDocSubfolders("pkg")
 	if err != nil {
 		return err
 	}
-	err = c.checkReadmeSubfolders("services")
+	err = c.checkPackageDocSubfolders("services")
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (c *Checker) checkMonoRepo() error {
 
 func (c *Checker) checkApp() error {
 	c.checkReadme("")
-	err := c.checkReadmeSubfolders("app")
+	err := c.checkPackageDocSubfolders("app")
 	if err != nil {
 		return err
 	}
@@ -111,6 +111,13 @@ func (c *Checker) checkReadme(folder string) {
 	}
 }
 
+func (c *Checker) checkPackageDoc(folder string) {
+	err := fileWithContentExists(c.packageDoc(folder))
+	if err != nil {
+		c.reporter.Report(err.Error())
+	}
+}
+
 func (c *Checker) goFileHasDocComment(path string) error {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -118,7 +125,7 @@ func (c *Checker) goFileHasDocComment(path string) error {
 	}
 	lines := strings.Split(string(data), "\n")
 	for i := 0; i < 2; i++ {
-		if !strings.HasPrefix(lines[i], "///") {
+		if !strings.HasPrefix(lines[i], "//") {
 			c.reporter.Report(fmt.Sprintf("%s does not contain a file comment!", path))
 			return nil
 		}
@@ -127,7 +134,7 @@ func (c *Checker) goFileHasDocComment(path string) error {
 	return nil
 }
 
-func (c *Checker) checkReadmeSubfolders(folder string) error {
+func (c *Checker) checkPackageDocSubfolders(folder string) error {
 	checkFolder := filepath.Join(c.repoPath, folder)
 	files, err := ioutil.ReadDir(checkFolder)
 	if err != nil {
@@ -136,7 +143,7 @@ func (c *Checker) checkReadmeSubfolders(folder string) error {
 
 	for _, file := range files {
 		if file.IsDir() {
-			c.checkReadme(filepath.Join(folder, file.Name()))
+			c.checkPackageDoc(filepath.Join(folder, file.Name()))
 		}
 	}
 
@@ -150,7 +157,7 @@ func (c *Checker) checkGoFileDoc(subfolder string) error {
 	}
 
 	return filepath.Walk(root, func(path string, file os.FileInfo, err error) error {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".go") {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".go") && file.Name() != "doc.go" {
 			err := c.goFileHasDocComment(path)
 			if err != nil {
 				return err
@@ -162,6 +169,10 @@ func (c *Checker) checkGoFileDoc(subfolder string) error {
 
 func (c *Checker) readme(folder string) string {
 	return filepath.Join(c.repoPath, folder, "README.md")
+}
+
+func (c *Checker) packageDoc(folder string) string {
+	return filepath.Join(c.repoPath, folder, "doc.go")
 }
 
 func fileWithContentExists(file string) error {

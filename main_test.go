@@ -48,7 +48,7 @@ func TestCheckReadme(t *testing.T) {
 	}
 }
 
-func TestCheckReadmeSubfolders(t *testing.T) {
+func TestCheckPackageDocSubfolders(t *testing.T) {
 	tcs := []struct {
 		desc                   string
 		repoPath               string
@@ -56,12 +56,11 @@ func TestCheckReadmeSubfolders(t *testing.T) {
 		expectedReportMessages []string
 	}{
 		{
-			desc:     "has readme",
+			desc:     "has package doc",
 			repoPath: "testdata/",
-			folder:   "readme",
+			folder:   "gopackagedoc",
 			expectedReportMessages: []string{
-				"testdata/readme/noReadme/README.md does not exist!",
-				"testdata/readme/emptyReadme/README.md exists, but has no content!",
+				"testdata/gopackagedoc/noGoPackageDoc/doc.go does not exist!",
 			},
 		},
 	}
@@ -73,7 +72,7 @@ func TestCheckReadmeSubfolders(t *testing.T) {
 				repoPath: tc.repoPath,
 				reporter: memReporter,
 			}
-			assert.Nil(t, checker.checkReadmeSubfolders(tc.folder))
+			assert.Nil(t, checker.checkPackageDocSubfolders(tc.folder))
 
 			sort.Strings(tc.expectedReportMessages)
 			sort.Strings(memReporter.message)
@@ -113,10 +112,10 @@ func TestCheckMonoRepo(t *testing.T) {
 
 	expectedMessages := []string{
 		"testdata/monorepo/README.md does not exist!",
-		"testdata/monorepo/app/app1/README.md does not exist!",
-		"testdata/monorepo/pkg/pkg1/README.md does not exist!",
+		"testdata/monorepo/app/app1/doc.go does not exist!",
+		"testdata/monorepo/pkg/pkg1/doc.go does not exist!",
 		"testdata/monorepo/pkg/pkg1/nodoc.go does not contain a file comment!",
-		"testdata/monorepo/services/service1/README.md does not exist!",
+		"testdata/monorepo/services/service1/doc.go does not exist!",
 		"testdata/monorepo/services/service1/nodoc.go does not contain a file comment!",
 	}
 	sort.Strings(expectedMessages)
@@ -136,7 +135,7 @@ func TestCheckApp(t *testing.T) {
 
 	expectedMessages := []string{
 		"testdata/app/README.md does not exist!",
-		"testdata/app/app/foo/README.md does not exist!",
+		"testdata/app/app/foo/doc.go does not exist!",
 		"testdata/app/app/foo/foo_nodoc.go does not contain a file comment!",
 		"testdata/app/app/nodoc.go does not contain a file comment!",
 	}
