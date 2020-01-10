@@ -36,8 +36,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if checker.reporter.FoundIssues() {
-		fmt.Printf("Found issues, please check output\n")
+	if checker.reporter.FoundIssues() > 0 {
+		fmt.Printf("Found %d issues, please check output\n", checker.reporter.FoundIssues())
 		os.Exit(1)
 	}
 }
@@ -56,19 +56,19 @@ func runCheck(mode string, checker *Checker) error {
 
 type Reporter interface {
 	Report(string)
-	FoundIssues() bool
+	FoundIssues() int
 }
 
 type CLIReporter struct {
-	foundIssue bool
+	foundIssue int
 }
 
 func (r *CLIReporter) Report(message string) {
-	r.foundIssue = true
+	r.foundIssue++
 	fmt.Println(message)
 }
 
-func (r *CLIReporter) FoundIssues() bool {
+func (r *CLIReporter) FoundIssues() int {
 	return r.foundIssue
 }
 
@@ -78,8 +78,8 @@ type Checker struct {
 }
 
 func (c *Checker) checkMonoRepo() error {
-	c.checkReadme("") //top-level readme
-	err := c.checkPackageDocSubfolders("apps")
+	c.checkReadme("")                      //top-level readme
+	err := c.checkReadmeSubfolders("apps") //apps are probably not go projects and we require a Readme
 	if err != nil {
 		return err
 	}
@@ -156,6 +156,22 @@ func (c *Checker) checkPackageDocSubfolders(folder string) error {
 	for _, file := range files {
 		if file.IsDir() {
 			c.checkPackageDoc(filepath.Join(folder, file.Name()))
+		}
+	}
+
+	return nil
+}
+
+func (c *Checker) checkReadmeSubfolders(folder string) error {
+	checkFolder := filepath.Join(c.repoPath, folder)
+	files, err := ioutil.ReadDir(checkFolder)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			c.checkReadme(filepath.Join(folder, file.Name()))
 		}
 	}
 

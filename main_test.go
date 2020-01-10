@@ -112,7 +112,7 @@ func TestCheckMonoRepo(t *testing.T) {
 
 	expectedMessages := []string{
 		"testdata/monorepo/README.md does not exist!",
-		"testdata/monorepo/apps/app1/doc.go does not exist!",
+		"testdata/monorepo/apps/app1/README.md does not exist!",
 		"testdata/monorepo/pkg/pkg1/doc.go does not exist!",
 		"testdata/monorepo/pkg/pkg1/nodoc.go does not contain a file comment!",
 		"testdata/monorepo/services/service1/doc.go does not exist!",
@@ -155,6 +155,6 @@ func (r *MemReporter) Report(message string) {
 	r.message = append(r.message, message)
 }
 
-func (r *MemReporter) FoundIssues() bool {
-	return len(r.message) != 0
+func (r *MemReporter) FoundIssues() int {
+	return len(r.message)
 }
