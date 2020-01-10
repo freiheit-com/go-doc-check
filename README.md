@@ -3,4 +3,4 @@
 
 # go-doc-check
 
-documentation check for go repos
+Go documentation check for canonical fdc monorepos and app repos.

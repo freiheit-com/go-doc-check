@@ -112,7 +112,7 @@ func TestCheckMonoRepo(t *testing.T) {
 
 	expectedMessages := []string{
 		"testdata/monorepo/README.md does not exist!",
-		"testdata/monorepo/app/app1/doc.go does not exist!",
+		"testdata/monorepo/apps/app1/doc.go does not exist!",
 		"testdata/monorepo/pkg/pkg1/doc.go does not exist!",
 		"testdata/monorepo/pkg/pkg1/nodoc.go does not contain a file comment!",
 		"testdata/monorepo/services/service1/doc.go does not exist!",

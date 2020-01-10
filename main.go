@@ -67,7 +67,7 @@ type Checker struct {
 
 func (c *Checker) checkMonoRepo() error {
 	c.checkReadme("") //top-level readme
-	err := c.checkPackageDocSubfolders("app")
+	err := c.checkPackageDocSubfolders("apps")
 	if err != nil {
 		return err
 	}
