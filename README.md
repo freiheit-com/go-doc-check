@@ -3,4 +3,4 @@
 
 # go-doc-check
 
-Go documentation check for canonical fdc monorepos and app repos.
+Go documentation check for canonical fdc mono- and app repos.
